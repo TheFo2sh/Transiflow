@@ -56,51 +56,52 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
 
         try
         {
-            await InvokeStateExistHandlers();
-            _context.CurrentState = await handler.HandleTransition(_context, _context.CurrentState, @event);
-            await InvokeStateEntranceHandlers();
+            await InvokeStateExistHandlers(shadowContext);
+            shadowContext.CurrentState = await handler.HandleTransition(shadowContext, shadowContext.CurrentState, @event);
+            await InvokeStateEntranceHandlers(shadowContext);
+            _context = shadowContext;
+
         }
         
         catch (TargetInvocationException e) when (e.InnerException != null)
         {
-            await handler.CompensateTransition(_context, shadowContext.CurrentState, _context.CurrentState, @event, e.InnerException);
-            _context = shadowContext;
+            await handler.CompensateTransition(shadowContext, _context.CurrentState, shadowContext.CurrentState, @event, e.InnerException);
             throw e.InnerException;
         }
         catch (Exception e)
         {
-            await handler.CompensateTransition(_context, shadowContext.CurrentState, _context.CurrentState, @event, e);
+            await handler.CompensateTransition(shadowContext, _context.CurrentState, shadowContext.CurrentState, @event, e);
             _context = shadowContext;
             throw;
         }
     }
 
-    private async Task InvokeStateExistHandlers()
+    private async Task InvokeStateExistHandlers(TContext context)
     {
 
         var stateExistHandlerType =
-            typeof(IStateExistHandler<,>).MakeGenericType(typeof(TContext), _context.CurrentState.GetType());
+            typeof(IStateExistHandler<,>).MakeGenericType(typeof(TContext), context.CurrentState.GetType());
 
         foreach (var stateExistHandler in _serviceProvider.GetServices(stateExistHandlerType))
         {
             if (stateExistHandler == null) continue;
             var result = stateExistHandler.GetType().GetMethod("HandleExist")
-                ?.Invoke(stateExistHandler, new object[] { _context, _context.CurrentState });
+                ?.Invoke(stateExistHandler, new object[] { context, context.CurrentState });
             await (Task)result!;
         }
     }
 
-    private async Task InvokeStateEntranceHandlers()
+    private async Task InvokeStateEntranceHandlers(TContext context)
     {
 
         var stateEntranceHandlerType =
-            typeof(IStateEntranceHandler<,>).MakeGenericType(typeof(TContext), _context.CurrentState.GetType());
+            typeof(IStateEntranceHandler<,>).MakeGenericType(typeof(TContext), context.CurrentState.GetType());
 
         foreach (var stateEntranceHandler in _serviceProvider.GetServices(stateEntranceHandlerType))
         {
             if (stateEntranceHandler == null) continue;
             var result = stateEntranceHandler.GetType().GetMethod("HandleEntrance")
-                ?.Invoke(stateEntranceHandler, new object[] { _context, _context.CurrentState });
+                ?.Invoke(stateEntranceHandler, new object[] { context, context.CurrentState });
             await (Task)result!;
         }
     }
