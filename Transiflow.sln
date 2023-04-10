@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transiflow", "Transiflow\Transiflow.csproj", "{5E49563B-BB2C-4301-9C66-EF9D196F3DB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transiflow.Test", "Transiflow.Test\Transiflow.Test.csproj", "{F9E871B4-22A4-4C48-9BFA-EED4D32EBDBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E49563B-BB2C-4301-9C66-EF9D196F3DB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E49563B-BB2C-4301-9C66-EF9D196F3DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E49563B-BB2C-4301-9C66-EF9D196F3DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E49563B-BB2C-4301-9C66-EF9D196F3DB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9E871B4-22A4-4C48-9BFA-EED4D32EBDBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9E871B4-22A4-4C48-9BFA-EED4D32EBDBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9E871B4-22A4-4C48-9BFA-EED4D32EBDBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9E871B4-22A4-4C48-9BFA-EED4D32EBDBF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
