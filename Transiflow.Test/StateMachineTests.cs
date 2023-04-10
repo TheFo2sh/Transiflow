@@ -32,8 +32,7 @@ public class StateMachineTests
 
         var stateMachine =
             new StateMachine<TestState, TestStateTag, TestEvent, TestEventTag, TestContext>(_serviceProvider)
-                .AddTransition<TestStateA, TestEventA, TestStateB>(TestStateTag.StateA, TestEventTag.EventA,
-                    (sp, ctx) => new TestTransitionHandler());
+                .AddTransition(TestStateTag.StateA, TestEventTag.EventA, (sp, ctx) => new TestTransitionHandler());
 
         var testContext = new TestContext { CurrentState = new TestStateA() };
         var stateMachineService = stateMachine.CreateService(testContext);
@@ -162,7 +161,7 @@ public class StateMachineTests
         await stateMachineService.SendEvent(new TestEventA("123"));
 
         // Assert
-        transitionHandlerMock.Verify(handler => handler.CompensateTransition(It.IsAny<TestContext>(), It.IsAny<TestStateA>(), It.IsAny<TestEventA>(), It.IsAny<Exception>()), Times.Once);
+        transitionHandlerMock.Verify(handler => handler.CompensateTransition(It.IsAny<TestContext>(), It.IsAny<TestStateA>(),It.IsAny<TestStateB>(), It.IsAny<TestEventA>(), It.IsAny<Exception>()), Times.Once);
     }
 
 }

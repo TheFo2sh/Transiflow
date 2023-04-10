@@ -1,6 +1,6 @@
 ﻿namespace Transiflow;
 
-public class TransitionAdapter<TState, TStateTag, TEvent, TEventTag, TContext,TCurrentState,TTriggerEvent,TNewState>:ITransitionHandler<TContext,TState, TEvent,  TState>
+internal class TransitionAdapter<TState, TStateTag, TEvent, TEventTag, TContext,TCurrentState,TTriggerEvent,TNewState>:ITransitionHandler<TContext,TState, TEvent,  TState>
     where TState : IState<TStateTag>
     where TEvent : IEvent<TEventTag>
     where TStateTag : notnull
@@ -21,13 +21,16 @@ public class TransitionAdapter<TState, TStateTag, TEvent, TEventTag, TContext,TC
         return _transitionHandler.ValidateTransition(context, (TCurrentState)fromState, (TTriggerEvent)@event);
     }
 
-    public  async Task<TState> HandleTransition(TContext context, TState fromState, TEvent @event)
+    public async Task<TState> HandleTransition(TContext context, TState fromState, TEvent @event)
     {
         return await _transitionHandler.HandleTransition(context, (TCurrentState)fromState, (TTriggerEvent)@event);
     }
 
-    public async Task<TState> CompensateTransition(TContext context, TState fromState, TEvent @event, Exception exception)
+
+    public  Task CompensateTransition(TContext context, TState oldState, TState newState, TEvent @event, Exception exception)
     {
-        return await _transitionHandler.CompensateTransition(context, (TCurrentState)fromState, (TTriggerEvent)@event,exception);
+         return _transitionHandler.CompensateTransition(context, (TCurrentState)oldState, (TNewState)newState, (TTriggerEvent)@event, exception);
     }
+
+
 }

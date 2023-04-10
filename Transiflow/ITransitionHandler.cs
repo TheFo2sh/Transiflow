@@ -26,5 +26,5 @@ public interface ITransitionHandler<TContext,TState, TEvent, TNewState>
     /// <param name="event"></param>
     /// <param name="exception"></param>
     /// <returns></returns>
-    Task<TNewState> CompensateTransition(TContext context, TState fromState, TEvent @event,Exception exception);
+    Task CompensateTransition(TContext context,TState oldState, TNewState newState, TEvent @event,Exception exception);
 }

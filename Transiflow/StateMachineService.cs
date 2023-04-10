@@ -54,7 +54,7 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
         await InvokeStateExistHandlers();
 
         var handler =await GetNextHandler(@event, _transitions[_context.CurrentState.Tag][@event.Tag]);
-        _context.CurrentState = await handler.HandleTransition(shadowContext, shadowContext.CurrentState, @event);
+        _context.CurrentState = await handler.HandleTransition(_context, _context.CurrentState, @event);
 
         try
         {
@@ -62,13 +62,14 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
         }
         catch (Exception e)
         {
-            await handler.CompensateTransition(shadowContext, shadowContext.CurrentState, @event, e);
+            await handler.CompensateTransition(_context, shadowContext.CurrentState,_context.CurrentState, @event, e);
+            _context = shadowContext;
+            throw;
         }
     }
 
     private async Task InvokeStateExistHandlers()
     {
-        var shadowContext = _codec.Copy(_context);
 
         var stateExistHandlerType =
             typeof(IStateExistHandler<,>).MakeGenericType(typeof(TContext), _context.CurrentState.GetType());
@@ -77,14 +78,13 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
         {
             if (stateExistHandler == null) continue;
             var result = stateExistHandler.GetType().GetMethod("HandleExist")
-                ?.Invoke(stateExistHandler, new object[] { shadowContext, shadowContext.CurrentState });
+                ?.Invoke(stateExistHandler, new object[] { _context, _context.CurrentState });
             await (Task)result!;
         }
     }
 
     private async Task InvokeStateEntranceHandlers()
     {
-        var shadowContext = _codec.Copy(_context);
 
         var stateEntranceHandlerType =
             typeof(IStateEntranceHandler<,>).MakeGenericType(typeof(TContext), _context.CurrentState.GetType());
@@ -93,7 +93,7 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
         {
             if (stateEntranceHandler == null) continue;
             var result = stateEntranceHandler.GetType().GetMethod("HandleEntrance")
-                ?.Invoke(stateEntranceHandler, new object[] { shadowContext, shadowContext.CurrentState });
+                ?.Invoke(stateEntranceHandler, new object[] { _context, _context.CurrentState });
             await (Task)result!;
         }
     }

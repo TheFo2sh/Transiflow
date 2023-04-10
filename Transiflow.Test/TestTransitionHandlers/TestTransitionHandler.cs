@@ -12,8 +12,8 @@ public class TestTransitionHandler : ITransitionHandler<TestContext.TestContext,
         return Task.FromResult(new TestStateB());
     }
 
-    public Task<TestStateB> CompensateTransition(TestContext.TestContext context, TestStateA fromState, TestEventA @event, Exception exception)
+    public Task CompensateTransition(TestContext.TestContext context, TestStateA fromState, TestStateB toState, TestEventA @event, Exception exception)
     {
-        return Task.FromResult(new TestStateB());
+        return Task.CompletedTask;
     }
 }
