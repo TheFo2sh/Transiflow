@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using StateMachine;
+using Transiflow;
 ```
 2-Include the provided state machine and related interfaces in your project.
 
@@ -29,7 +29,9 @@ using StateMachine;
 5-Set up your state machine configuration
     
 ```csharp
-var serviceProvider = new ServiceCollection().BuildServiceProvider();
+var services = new ServiceCollection();
+ServiceCollection.AddScoped<ICodec<Context>, ContextCodec>
+var serviceProvider = services.BuildServiceProvider();
 
 var stateMachine = new StateMachine<TState, TStateTag, TEvent, TEventTag, TContext>(serviceProvider)
 .AddTransition<TCurrentState, TTriggerEvent, TNewState>(sourceStateTag, eventTag, (sp, ctx) => new TransitionHandler());
@@ -44,6 +46,46 @@ var stateMachineService = stateMachine.CreateService(context);
 ```csharp
 stateMachineService.SendEvent(new TEvent());
 ``` 
+## Custom Entrance and Exit Actions
+
+TransiFlow supports executing custom entrance and exit actions for each state by implementing the `IStateEntranceHandler<TContext, TState>` and `IStateExistHandler<TContext, TState>` interfaces, respectively.
+
+### IStateEntranceHandler
+
+Implement this interface to define custom actions that should be executed when entering a specific state.
+
+```csharp
+public class CustomStateEntranceHandler : IStateEntranceHandler<TContext, TState>
+{
+    public async Task HandleEntrance(TContext context, TState state)
+    {
+        // Your custom entrance action logic here
+    }
+}
+```
+### IStateExistHandler
+Implement this interface to define custom actions that should be executed when exiting a specific state.
+
+```csharp
+public class CustomStateExitHandler : IStateExitHandler<TContext, TState>
+{
+    public async Task HandleExit(TContext context, TState state)
+    {
+        // Your custom exit action logic here
+    }
+}
+```
+Register your custom entrance and exit handlers with the dependency injection container to ensure they are executed during the state transitions.
+
+```csharp
+var serviceCollection = new ServiceCollection();
+
+serviceCollection
+    .AddSingleton<IStateExistHandler<TContext, TState>, CustomStateExitHandler>()
+    .AddSingleton<IStateEntranceHandler<TContext, TState>, CustomStateEntranceHandler>();
+
+var serviceProvider = serviceCollection.BuildServiceProvider();
+```
 ## Examples
 Check the unit tests provided in the project for examples of setting up state machines and using them in various scenarios.
 
