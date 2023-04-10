@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Transiflow;
@@ -51,18 +52,24 @@ public class StateMachineService<TState, TStateTag, TEvent, TEventTag, TContext>
                 $"Cannot handle event {@event.Tag} in state {_context.CurrentState.Tag}");
 
         var shadowContext = _codec.Copy(_context);
-        await InvokeStateExistHandlers();
-
-        var handler =await GetNextHandler(@event, _transitions[_context.CurrentState.Tag][@event.Tag]);
-        _context.CurrentState = await handler.HandleTransition(_context, _context.CurrentState, @event);
+        var handler = await GetNextHandler(@event, _transitions[_context.CurrentState.Tag][@event.Tag]);
 
         try
         {
+            await InvokeStateExistHandlers();
+            _context.CurrentState = await handler.HandleTransition(_context, _context.CurrentState, @event);
             await InvokeStateEntranceHandlers();
+        }
+        
+        catch (TargetInvocationException e) when (e.InnerException != null)
+        {
+            await handler.CompensateTransition(_context, shadowContext.CurrentState, _context.CurrentState, @event, e.InnerException);
+            _context = shadowContext;
+            throw e.InnerException;
         }
         catch (Exception e)
         {
-            await handler.CompensateTransition(_context, shadowContext.CurrentState,_context.CurrentState, @event, e);
+            await handler.CompensateTransition(_context, shadowContext.CurrentState, _context.CurrentState, @event, e);
             _context = shadowContext;
             throw;
         }

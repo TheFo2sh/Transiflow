@@ -140,7 +140,7 @@ public class StateMachineTests
     {
         // Arrange
         var entranceHandlerMock = new Mock<IStateEntranceHandler<TestContext, TestStateB>>();
-        entranceHandlerMock.Setup(handler => handler.HandleEntrance(It.IsAny<TestContext>(), It.IsAny<TestStateB>())).Throws<InvalidOperationException>();
+        entranceHandlerMock.Setup(handler => handler.HandleEntrance(It.IsAny<TestContext>(), It.IsAny<TestStateB>())).Throws<ArgumentException>();
 
         var serviceProvider = new ServiceCollection()
             .AddScoped<ICodec<TestContext>, TestContextCodec>()
@@ -158,7 +158,7 @@ public class StateMachineTests
         var stateMachineService = stateMachine.CreateService(testContext);
 
         // Act
-        await stateMachineService.SendEvent(new TestEventA("123"));
+        await Assert.ThrowsAsync<ArgumentException>(()=> stateMachineService.SendEvent(new TestEventA("123")));
 
         // Assert
         transitionHandlerMock.Verify(handler => handler.CompensateTransition(It.IsAny<TestContext>(), It.IsAny<TestStateA>(),It.IsAny<TestStateB>(), It.IsAny<TestEventA>(), It.IsAny<Exception>()), Times.Once);
