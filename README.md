@@ -1,4 +1,4 @@
-﻿# StateMachine
+﻿# Transiflow
 
 A C# implementation of a generic, flexible state machine with support for validating and handling state transitions, as well as custom entrance and exit actions for each state.
 
